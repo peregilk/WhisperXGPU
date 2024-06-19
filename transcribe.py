@@ -111,6 +111,7 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
                     # Write to the output file
                     writer.write(output)
 
+                print(f"Processed {total_samples} samples so far.")
                 batch = []
                 # Clear GPU memory if necessary
                 gc.collect()
@@ -143,6 +144,7 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
                 # Write to the output file
                 writer.write(output)
 
+            print(f"Processed {total_samples} samples so far.")
             # Clear GPU memory if necessary
             gc.collect()
             torch.cuda.empty_cache()
@@ -182,11 +184,11 @@ if __name__ == "__main__":
     parser.add_argument('--shard_indices', type=str, default=None, help='A comma-separated list of shard indices to load (0-indexed). If not set, all shards will be read.')
     parser.add_argument('--max_samples', type=int, default=None, help='The maximum number of samples to print and transcribe. If not set, it is unlimited.')
     parser.add_argument('--device', type=str, default='cuda', help='The device to use for inference (e.g., "cuda" or "cpu").')
-    parser.add.argument('--batch_size', type=int, default=16, help='Batch size for transcription.')
-    parser.add.argument('--language', type=str, default='no', help='The language to use for transcription and alignment.')
-    parser.add.argument('--model_name', type=str, default='NbAiLab/nb-whisper-small', help='The name of the Whisper model to use.')
-    parser.add.argument('--output_dir', type=str, required=True, help='The directory where the results will be saved.')
-    parser.add.argument('--bucket', type=str, default=None, help='The name of the Google Cloud Storage bucket to upload results.')
+    parser.add_argument('--batch_size', type=int, default=16, help='Batch size for transcription.')
+    parser.add_argument('--language', type=str, default='no', help='The language to use for transcription and alignment.')
+    parser.add_argument('--model_name', type=str, default='NbAiLab/nb-whisper-small', help='The name of the Whisper model to use.')
+    parser.add_argument('--output_dir', type=str, required=True, help='The directory where the results will be saved.')
+    parser.add_argument('--bucket', type=str, default=None, help='The name of the Google Cloud Storage bucket to upload results.')
 
     args = parser.parse_args()
     
