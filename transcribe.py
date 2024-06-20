@@ -112,6 +112,11 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
                     writer.write(output)
 
                 print(f"Processed {total_samples} samples so far.")
+                
+                # Upload to bucket after the first batch and every 5000 samples
+                if bucket and (total_samples < batch_size or total_samples % 5000 < batch_size):
+                    upload_to_bucket(bucket, output_file, f"{base_filename}.jsonl")
+
                 batch = []
                 # Clear GPU memory if necessary
                 gc.collect()
