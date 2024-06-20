@@ -209,4 +209,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     print_items_from_shard_and_transcribe(
-        args.dataset_name, args.split, args
+        args.dataset_name, args.split, args.num_shards, args.shard_indices, args.max_samples, args.device, args.batch_size, args.language, args.model_name, args.output_dir, args.bucket
+)
