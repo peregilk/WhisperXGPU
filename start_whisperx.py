@@ -9,10 +9,10 @@ def run_commands(vm_names, shard_indices=None, zone="us-central1-a"):
 
     for i, shard_index in zip(vm_names, shard_indices):
         instance_name = f"north-l4-p{i}"
-        command = (f"nohup /opt/conda/bin/python /home/pere/WhisperXGPU/transcribe.py "
+        command = (f"sudo -u pere nohup /opt/conda/bin/python /home/pere/WhisperXGPU/transcribe.py "
                    f"--shard_indices {shard_index} --batch_size 128 --output_dir output/ "
                    f"--model_name NbAiLab/nb-whisper-large --bucket nostram-transcripts2 "
-                   "> /dev/null 2>&1 &")
+                   f">> /home/pere/WhisperXGPU/log.txt 2>&1 &")
 
         # Run the command on the VM
         subprocess.run([
