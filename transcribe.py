@@ -44,6 +44,7 @@ def upload_to_bucket(bucket_name, file_path, blob_name):
 
 def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard_indices, max_samples, device, batch_size, language, model_name, output_dir, bucket):
     # Load the dataset in streaming mode with trust_remote_code=True
+    print("Loading dataset...")
     dataset = load_dataset(dataset_name, split=split, streaming=True, trust_remote_code=True)
     
     # If shard_indices is not provided, read everything
@@ -61,6 +62,7 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
     iterator = iter(filtered_dataset)
 
     # Load the WhisperX model
+    print(f"Loading WhisperX model {model_name} on {device}...")
     model = whisperx.load_model(model_name, device, compute_type="float16")
     model_a, metadata = whisperx.load_align_model(language_code=language, device=device)
 
@@ -76,6 +78,9 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
     # Initialize statistics
     start_time = time.time()
     total_samples = 0
+    next_upload_threshold = 5000
+
+    print("Starting processing...")
 
     with jsonlines.open(output_file, mode='w') as writer:
         batch = []
@@ -115,9 +120,10 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
                 print(f"Processed {total_samples} samples so far.")
                 
                 # Upload to bucket after the first batch and every 5000 samples
-                if bucket and (total_samples == batch_size or total_samples % 5000 < batch_size):
+                if bucket and (total_samples == batch_size or total_samples >= next_upload_threshold):
                     print(f"Preparing to upload after processing {total_samples} samples.")
                     upload_to_bucket(bucket, output_file, f"{base_filename}.jsonl")
+                    next_upload_threshold += 5000
 
                 batch = []
                 # Clear GPU memory if necessary
@@ -184,6 +190,8 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
     gc.collect()
     torch.cuda.empty_cache()
 
+    print("Processing complete.")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Print items from a dataset and transcribe using WhisperX.")
     parser.add_argument('--dataset_name', type=str, default='NbAiLab/ncc_speech_v7', help='The name of the dataset to load.')
@@ -198,4 +206,7 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', type=str, required=True, help='The directory where the results will be saved.')
     parser.add_argument('--bucket', type=str, default=None, help='The name of the Google Cloud Storage bucket to upload results.')
 
-   
+    args = parser.parse_args()
+    
+    print_items_from_shard_and_transcribe(
+        args.dataset_name, args.split, args
