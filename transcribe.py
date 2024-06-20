@@ -35,6 +35,7 @@ def process_batch(batch, model, model_a, metadata, language, batch_size, device)
     return results
 
 def upload_to_bucket(bucket_name, file_path, blob_name):
+    print(f"Uploading {file_path} to gs://{bucket_name}/{blob_name}")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
@@ -114,7 +115,8 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
                 print(f"Processed {total_samples} samples so far.")
                 
                 # Upload to bucket after the first batch and every 5000 samples
-                if bucket and (total_samples < batch_size or total_samples % 5000 < batch_size):
+                if bucket and (total_samples == batch_size or total_samples % 5000 < batch_size):
+                    print(f"Preparing to upload after processing {total_samples} samples.")
                     upload_to_bucket(bucket, output_file, f"{base_filename}.jsonl")
 
                 batch = []
@@ -172,6 +174,7 @@ def print_items_from_shard_and_transcribe(dataset_name, split, num_shards, shard
 
     # Upload the final output to the bucket
     if bucket:
+        print("Uploading final files to the bucket.")
         upload_to_bucket(bucket, output_file, f"{base_filename}.jsonl")
         upload_to_bucket(bucket, summary_file, f"summary_{base_filename}.json")
 
@@ -195,8 +198,4 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', type=str, required=True, help='The directory where the results will be saved.')
     parser.add_argument('--bucket', type=str, default=None, help='The name of the Google Cloud Storage bucket to upload results.')
 
-    args = parser.parse_args()
-    
-    print_items_from_shard_and_transcribe(
-        args.dataset_name, args.split, args.num_shards, args.shard_indices, args.max_samples, args.device, args.batch_size, args.language, args.model_name, args.output_dir, args.bucket
-    )
+   
