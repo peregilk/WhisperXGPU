@@ -6,9 +6,9 @@ def create_vms(vm_names, zone="us-central1-a"):
     machine_type = "g2-standard-4"
     service_account = "north-390910@appspot.gserviceaccount.com"
     accelerator = "count=1,type=nvidia-l4"
-    image = "l4-clone-image"
+    image = "l4-20june2024-image"
     image_project = "north-390910"
-    boot_disk_size = "50GB"
+    boot_disk_size = "200GB"
     boot_disk_type = "pd-balanced"
 
     for i in vm_names:
